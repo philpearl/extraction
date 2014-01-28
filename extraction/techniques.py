@@ -70,10 +70,10 @@ class HeadTags(Technique):
                     if 'urls' not in extracted:
                         extracted['urls'] = []
                     extracted['urls'].append(link_tag['href'])
-                    
+
         return extracted
 
-    
+
 
 class FacebookOpengraphTags(Technique):
     """
@@ -105,6 +105,7 @@ class FacebookOpengraphTags(Technique):
         'og:url': 'urls',
         'og:image': 'images',
         'og:description': 'descriptions',
+        'og:type': 'types',  # Ideally would annotate this to indicate an OG type
         }
 
     def extract(self, html):
@@ -128,7 +129,7 @@ class HTML5SemanticTags(Technique):
     The HTML5 `article` tag, and also the `video` tag give us some useful
     hints for extracting page information for the sites which happen to
     utilize these tags.
-    
+
     This technique will extract information from pages formed like::
 
         <html>
@@ -195,13 +196,13 @@ class SemanticTags(Technique):
         "Extract data from Facebook Opengraph tags."
         extracted = {}
         soup = BeautifulSoup(html)
-        
+
         for tag, dest, max_to_store in self.extract_string:
             for found in soup.find_all(tag)[:max_to_store] or []:
                 if dest not in extracted:
                     extracted[dest] = []
                 extracted[dest].append(" ".join(found.strings))
-        
+
 
         for tag, dest, attribute, max_to_store in self.extract_attr:
             for found in soup.find_all(tag)[:max_to_store] or []:
@@ -211,5 +212,5 @@ class SemanticTags(Technique):
                     extracted[dest].append(found[attribute])
 
         return extracted
-    
-    
+
+

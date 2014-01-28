@@ -14,7 +14,7 @@ import importlib
 class Extracted(object):
     "Contains data extracted from a page."
 
-    def __init__(self, titles=None, descriptions=None, images=None, urls=None, feeds=None, **kwargs):
+    def __init__(self, titles=None, descriptions=None, images=None, urls=None, feeds=None, types=None, **kwargs):
         """
         Initialize Extracted instance.
 
@@ -56,7 +56,9 @@ class Extracted(object):
         if urls is None:
             urls = []
         if feeds is None:
-           feeds = []
+            feeds = []
+        if types is None:
+            types = []
 
         assert type(titles) in (list, tuple), "titles must be a list or tuple"
         assert type(descriptions) in (list, tuple), "descriptions must be a list or tuple"
@@ -69,6 +71,7 @@ class Extracted(object):
         self.images = images
         self.urls = urls
         self.feeds = feeds
+        self.types = types
 
         # stores unexpected and uncaptured values to avoid crashing if
         # a technique returns additional types of data
@@ -81,6 +84,7 @@ class Extracted(object):
                    ("image", self.images),
                    ("feed", self.feeds),
                    ("description", self.descriptions),
+                   ("types", self.types),
                    )
 
         details_strs = []
@@ -135,6 +139,12 @@ class Extracted(object):
             return self.feeds[0]
         else:
             return None
+
+    @property
+    def type(self):
+        if self.types:
+            return self.types[0]
+        return None
 
 
 class Extractor(object):
