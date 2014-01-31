@@ -11,10 +11,11 @@ Retrieve and extract data from HTML documents.
 import urlparse
 import importlib
 
+
 class Extracted(object):
     "Contains data extracted from a page."
 
-    def __init__(self, titles=None, descriptions=None, images=None, urls=None, feeds=None, types=None, **kwargs):
+    def __init__(self, titles=None, descriptions=None, images=None, urls=None, feeds=None, types=None, twitter_cards=None, **kwargs):
         """
         Initialize Extracted instance.
 
@@ -72,6 +73,7 @@ class Extracted(object):
         self.urls = urls
         self.feeds = feeds
         self.types = types
+        self.twitter_cards = twitter_cards or []
 
         # stores unexpected and uncaptured values to avoid crashing if
         # a technique returns additional types of data
@@ -85,6 +87,7 @@ class Extracted(object):
                    ("feed", self.feeds),
                    ("description", self.descriptions),
                    ("types", self.types),
+                   ("twitter_cards", self.twitter_cards)
                    )
 
         details_strs = []
@@ -146,10 +149,17 @@ class Extracted(object):
             return self.types[0]
         return None
 
+    @property
+    def twitter_card(self):
+        if self.twitter_cards:
+            return self.twitter_cards[0]
+        return None
+
 
 class Extractor(object):
     "Extracts title, summary and image(s) from an HTML document."
     techniques = ["extraction.techniques.FacebookOpengraphTags",
+                  "extraction.techniques.Twitter",
                   "extraction.techniques.HTML5SemanticTags",
                   "extraction.techniques.HeadTags",
                   "extraction.techniques.SemanticTags",

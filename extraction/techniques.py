@@ -214,3 +214,48 @@ class SemanticTags(Technique):
         return extracted
 
 
+class Twitter(Technique):
+    """
+       <meta name="twitter:card" content="player">
+    <meta name="twitter:site" content="@youtube">
+    <meta name="twitter:url" content="http://www.youtube.com/watch?v=eAwwQ6lYJfo">
+    <meta name="twitter:title" content="The Big Bang Theory (bloopers) -- Sheldon">
+    <meta name="twitter:description" content="Recommended Links Mobile App Link: http://www.iLivingApp.com/mobileappforpros Link: http://www.morewebmoney.com/ Link: http://cbpirate.com/?hop=rdco5 Video i...">
+    <meta name="twitter:image" content="http://i1.ytimg.com/vi/eAwwQ6lYJfo/maxresdefault.jpg">
+    <meta name="twitter:app:name:iphone" content="YouTube">
+    <meta name="twitter:app:id:iphone" content="544007664">
+    <meta name="twitter:app:name:ipad" content="YouTube">
+    <meta name="twitter:app:id:ipad" content="544007664">
+      <meta name="twitter:app:url:iphone" content="vnd.youtube://watch/eAwwQ6lYJfo">
+      <meta name="twitter:app:url:ipad" content="vnd.youtube://watch/eAwwQ6lYJfo">
+    <meta name="twitter:app:name:googleplay" content="YouTube">
+    <meta name="twitter:app:id:googleplay" content="com.google.android.youtube">
+    <meta name="twitter:app:url:googleplay" content="http://www.youtube.com/watch?v=eAwwQ6lYJfo">
+      <meta name="twitter:player" content="https://www.youtube.com/embed/eAwwQ6lYJfo">
+      <meta name="twitter:player:width" content="960">
+      <meta name="twitter:player:height" content="720">
+
+    Player appears to be something we can embed in an iframe
+    """
+
+    # We're actually looking for just one twitter card thingy
+
+    def extract(self, html):
+        extracted = {}
+        soup = BeautifulSoup(html)
+        card = {}
+
+        for meta_tag in soup.find_all('meta'):
+            try:
+                property_ = meta_tag['name']
+                if not property_.startswith("twitter:"):
+                    continue
+
+                property_ = property_[len("twitter:"):].replace(":", "_")
+                card[property_] = meta_tag.attrs['content']
+            except KeyError:
+                pass
+
+        if 'card' in card:
+            extracted.setdefault('twitter_cards', []).append(card)
+        return extracted
