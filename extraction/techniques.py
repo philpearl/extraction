@@ -106,21 +106,34 @@ class FacebookOpengraphTags(Technique):
         'og:image': 'images',
         'og:description': 'descriptions',
         'og:type': 'types',  # Ideally would annotate this to indicate an OG type
-        }
+    }
 
     def extract(self, html):
         "Extract data from Facebook Opengraph tags."
         extracted = {}
         soup = BeautifulSoup(html)
+        og_tags = {}
         for meta_tag in soup.find_all('meta'):
-            if 'property' in meta_tag.attrs and 'content' in meta_tag.attrs:
-                property = meta_tag['property']
-                if property in self.property_map:
-                    property_dest = self.property_map[property]
-                    if property_dest not in extracted:
-                        extracted[property_dest] = []
-                    extracted[property_dest].append(meta_tag.attrs['content'])
+            try:
+                try:
+                    property_ = meta_tag['property']
+                except KeyError:
+                    property_ = meta_tag['name']
 
+                if not property_.startswith("og:"):
+                    continue
+                content = meta_tag['content']
+
+                og_prop = property_[len("og:"):].replace(":", "_")
+                og_tags[og_prop] = content
+
+                property_dest = self.property_map[property_]
+                extracted.setdefault(property_dest, []).append(content)
+            except KeyError:
+                pass
+
+        if 'type' in og_tags:
+            extracted['og_tags'] = og_tags
         return extracted
 
 

@@ -75,6 +75,9 @@ class Extracted(object):
         self.types = types
         self.twitter_cards = twitter_cards or []
 
+        for key, value in kwargs.iteritems():
+            setattr(self, key, value)
+
         # stores unexpected and uncaptured values to avoid crashing if
         # a technique returns additional types of data
         self._unexpected_values = kwargs
@@ -225,7 +228,7 @@ class Extractor(object):
         3. filter out duplicate values
         """
         cleaned_results = {}
-        for data_type, data_values in results.items():
+        for data_type, data_values in results.iteritems():
             if data_type in self.text_types:
                 data_values = [self.cleanup_text(x) for x in filter(None, data_values)]
             if data_type in self.url_types:
@@ -258,10 +261,10 @@ class Extractor(object):
         extracted = {}
         for technique in self.techniques:
             technique_extracted = self.run_technique(technique, html)
-            for data_type, data_values in technique_extracted.items():
+            for data_type, data_values in technique_extracted.iteritems():
                 if data_values:
-                    if data_type not in extracted:
-                        extracted[data_type] = []
-                    extracted[data_type] += data_values
-
+                    if isinstance(data_values, dict):
+                        extracted.setdefault(data_type, []).append(data_values)
+                    else:
+                        extracted.setdefault(data_type, []).extend(data_values)
         return self.extracted_class(**self.cleanup(extracted, html, source_url=source_url))
