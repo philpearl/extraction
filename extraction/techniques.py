@@ -247,7 +247,10 @@ class Twitter(Technique):
 
         for meta_tag in soup.find_all('meta'):
             try:
-                property_ = meta_tag['name']
+                try:
+                    property_ = meta_tag['name']
+                except KeyError:
+                    property_ = meta_tag['property']
                 if not property_.startswith("twitter:"):
                     continue
 
