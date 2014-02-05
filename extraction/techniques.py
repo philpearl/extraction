@@ -74,7 +74,6 @@ class HeadTags(Technique):
         return extracted
 
 
-
 class FacebookOpengraphTags(Technique):
     """
     Extract info from html Facebook Opengraph meta tags.
@@ -188,6 +187,28 @@ class HTML5SemanticTags(Technique):
         return {'titles':titles, 'descriptions':descriptions, 'videos':videos}
 
 
+def filter_img_tag(elt):
+    """ Filter out undesireable image tags
+
+    For the moment we look for ones with display:none
+    """
+    try:
+        style = elt['style']
+    except KeyError:
+        return True
+    if style:
+        for keyval in style.split(';'):
+            print keyval
+            try:
+                key, value = keyval.split(':', 1)
+            except ValueError:
+                pass
+            else:
+                if key.strip() == "display" and value.strip() == "none":
+                    return False
+    return True
+
+
 class SemanticTags(Technique):
     """
     This technique relies on the basic tags themselves--for example,
@@ -204,8 +225,8 @@ class SemanticTags(Technique):
                       ('h3', 'titles', 1),
                       ('p', 'descriptions', 5),
                       ]
-    # format is ("name of tag", "destination list", "name of attribute" store_first_n)
-    extract_attr = [('img', 'images', 'src', 10)]
+    # format is ("name of tag", "destination list", "name of attribute" store_first_n filter)
+    extract_attr = (('img', 'images', 'src', 10, filter_img_tag), )
 
     def extract(self, html):
         "Extract data from Facebook Opengraph tags."
@@ -218,10 +239,11 @@ class SemanticTags(Technique):
                     extracted[dest] = []
                 extracted[dest].append(" ".join(found.strings))
 
-
-        for tag, dest, attribute, max_to_store in self.extract_attr:
+        for tag, dest, attribute, max_to_store, tag_filter in self.extract_attr:
             for found in soup.find_all(tag)[:max_to_store] or []:
                 if attribute in found.attrs:
+                    if tag_filter and not tag_filter(found):
+                        continue
                     if dest not in extracted:
                         extracted[dest] = []
                     extracted[dest].append(found[attribute])
