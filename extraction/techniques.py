@@ -122,7 +122,9 @@ class FacebookOpengraphTags(Technique):
 
                 if not property_.startswith("og:"):
                     continue
-                content = meta_tag['content']
+                content = meta_tag['content'].strip()
+                if not content:
+                    continue
 
                 og_prop = property_[len("og:"):].replace(":", "_")
                 og_tags[og_prop] = content
