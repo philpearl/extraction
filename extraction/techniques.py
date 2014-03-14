@@ -198,7 +198,6 @@ def filter_img_tag(elt):
         return True
     if style:
         for keyval in style.split(';'):
-            print keyval
             try:
                 key, value = keyval.split(':', 1)
             except ValueError:
